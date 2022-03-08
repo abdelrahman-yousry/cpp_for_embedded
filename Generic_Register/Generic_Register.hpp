@@ -27,19 +27,39 @@ public:
     ERROR_STATUS clearBit(std::uint8_t copy_BitNum);
     ERROR_STATUS getBit(std::uint8_t copy_BitNum,bool &Ref_BitValue);
     ERROR_STATUS setPermission(REG_PERMISSION permission);
-    ERROR_STATUS setBitPermission(std::uint8_t Copy_BitNum , REG_PERMISSION Permission)
+    ERROR_STATUS setBitPermission(std::uint8_t Copy_BitNum , REG_PERMISSION Permission);
 };
 template <class T>
-Generic_Register<T>::Generic_Register(T * Register)
+Generic_Register<T>::Generic_Register(T * Register,REG_PERMISSION Permission)
 {
-    RegAdd=Register;
+    RegAdd = Register;
+    switch(Permission)
+    {
+        case READ:
+            Read_Only = ~((T) 0);
+            Write_Only = 0;
+            break;
+        case WRITE:
+            Write_Only = ~((T) 0);
+            Read_Only = 0;
+            break;        
+        case READ_WRITE:
+            Write_Only = ~((T) 0);
+            Read_Only = ~((T) 0);
+            break;
+        case RESERVED:
+            Read_Only = 0;
+            Write_Only = 0;
+            break;            
+    }
 }
+template<class T>
 ERROR_STATUS Generic_Register <T>::setRegVal(T copy_value)
 {
     ERROR_STATUS LOC_retErrorStatus = NOK;
     if(Write_Only == ~((T) 0))
     {
-        *RegAdd = Copy_tValue;
+        *RegAdd = copy_value;
         LOC_retErrorStatus= OK;
     }
 
@@ -56,6 +76,7 @@ ERROR_STATUS Generic_Register <T>::getRegVal(T &Ref_tValue)
     }
     return LOC_retErrorStatus;    
 }
+template<class T>
 ERROR_STATUS Generic_Register <T>::setBit(std::uint8_t copy_BitNum)
 {
     ERROR_STATUS LOC_retErrorStatus= NOK;
@@ -66,6 +87,7 @@ ERROR_STATUS Generic_Register <T>::setBit(std::uint8_t copy_BitNum)
     }
     return LOC_retErrorStatus;
 }
+template<class T>
 ERROR_STATUS Generic_Register <T>::clearBit(std::uint8_t copy_BitNum)
 {
     ERROR_STATUS LOC_retErrorStatus= NOK;
